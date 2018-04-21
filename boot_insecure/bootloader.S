@@ -19,7 +19,9 @@ reset:
   call clean_core
 
   # boot payload
-  la t0, sanctum_sm_ptr
+	csrr a0, mhartid
+  la a1, _dtb
+	la t0, sanctum_sm_ptr
   jr t0
 
   # <end of bootloader>

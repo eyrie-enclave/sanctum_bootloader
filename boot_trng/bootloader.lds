@@ -4,7 +4,7 @@ ENTRY( _entry )
 
 SECTIONS
 {
-  . = 0x11020; /* boot loader lives in boot ROM after the device tree */
+  . = 0x1000; /* boot loader lives in boot ROM after the device tree */
 
   .text :
   {
@@ -13,5 +13,7 @@ SECTIONS
     *(*)
   }
 
+	PROVIDE( _dtb = . );
+	
   INCLUDE common/header.lds
 }

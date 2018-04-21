@@ -40,18 +40,20 @@ typedef unsigned char byte;
 // Sanctum header fields in DRAM
 extern byte sanctum_dev_public_key[32];
 extern byte sanctum_dev_secret_key[64];
-extern unsigned int * sanctum_sm_size;
+extern unsigned int sanctum_sm_size[1];
 extern byte sanctum_sm_hash[64];
 extern byte sanctum_sm_public_key[32];
 extern byte sanctum_sm_secret_key[64];
 extern byte sanctum_sm_signature[64];
-extern const byte * sanctum_sm_ptr;
+extern const byte sanctum_sm_ptr[64];
 
 inline byte random_byte() {
-  return (byte)(read_csr(trng));
+	return 0xda;
+  //return (byte)(read_csr(trng));
 }
 
 void bootloader() {
+	//*sanctum_sm_size = 0x200;
   // Reserve stack space for secrets
   byte scratchpad[64];
   sha512_context hash_ctx;
@@ -63,7 +65,7 @@ void bootloader() {
 
   // Create a random seed for a device key from TRNG
   for (unsigned int i=0; i<32; i++) {
-    scratchpad[i] =random_byte();
+    scratchpad[i] = 0xac + (0xdd ^ i);//random_byte();
   }
 
   // Derive {SK_D, PK_D} (device keys) from a 32 B random seed
@@ -71,7 +73,7 @@ void bootloader() {
 
   // Measure SM
   sha512_init(&hash_ctx);
-  sha512_update(&hash_ctx, sanctum_sm_ptr, *sanctum_sm_size);
+  sha512_update(&hash_ctx, sanctum_sm_ptr, sanctum_sm_size[0]);
   sha512_final(&hash_ctx, sanctum_sm_hash);
 
   // Combine SK_D and H_SM via a hash
@@ -97,5 +99,4 @@ void bootloader() {
   memset((void*)sanctum_dev_secret_key, 0, sizeof(*sanctum_sm_secret_key));
 
   // caller will clean core state and memory (including the stack), and boot.
-  return;
-}
+  return;}
