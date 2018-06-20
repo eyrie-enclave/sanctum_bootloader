@@ -1,0 +1,76 @@
+OUTPUT_ARCH( "riscv" )
+ENTRY( bootloader_ptr )
+
+SECTIONS
+{
+  /* Trusted bootloader is invoked via a function call at the base of its segment! */
+
+  /* A special HTIF region to communicate with the host */
+  . = $FROMHOST;
+  .htif ALIGN(0x1000) (NOLOAD) : {
+    *(.htif.fromhost)
+    *(.htif.tohost)
+  }
+  . = ALIGN(0x1000);
+
+
+  /* Reserve some space for M-mode stacks (handled by ROT) */
+  .m_stacks (NOLOAD) : {
+    *(.mstacks)
+  }
+
+  ASSERT (( . <= $BOOTLOADER_BASE), "HTIF and Stacks overlap with the bootloader!")
+
+
+  /* trusted (but authenticated) boot loader in DRAM */
+  . = $BOOTLOADER_BASE;
+  .bootloader : {
+    PROVIDE(bootloader_ptr = .);
+    *(.text.bootloader.entry)
+    *(.text)
+    *(.text*)
+    *(.rodata)
+    *(.rodata.*)
+    *(.data*)
+    *(.data.*)
+    *(.bss*)
+    *(.bss.*)
+    *(.got)
+    *(.got*)
+  }
+  ASSERT (( . <= $BOOTLOADER_BASE + $BOOTLOADER_SIZE), "Bootloader segment is larger than the propoed BOOTLOADER_SIZE!")
+
+  . = ($BOOTLOADER_BASE + $BOOTLOADER_SIZE);
+
+  /* Security monitor's keys */
+  .sm_header (NOLOAD) : {
+    PROVIDE(PK_D = .);
+    . += 32;
+
+    PROVIDE(SM_H = .);
+    . += 64;
+
+    PROVIDE(PK_SM = .);
+    . += 32;
+
+    PROVIDE(SK_SM = .);
+    . += 64;
+
+    PROVIDE(SM_SIG = .);
+    . += 64;
+
+    PROVIDE(sm_size = .);
+    . += 64;
+  }
+
+  . = ALIGN(0x1000);
+
+  /* Security monitor */
+  .sm (NOLOAD) : {
+    PROVIDE(sm_ptr = .);
+    . += 8; /* hack to make sure this section isn't empty */
+  }
+
+  ASSERT (( . <= ($DRAM_BASE + $REGION_SIZE) ), "ROT asks for a memory map where the bootloader, stacks, HTIF, and the security monitor don't fit into one DRAM region! This could be okay, but probably isn't.")
+
+}

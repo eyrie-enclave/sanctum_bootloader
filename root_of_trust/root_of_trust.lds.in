@@ -1,0 +1,97 @@
+OUTPUT_ARCH( "riscv" )
+ENTRY( reset_vector )
+
+SECTIONS
+{
+  /* Boot ROM contains only the code needed to initialize DRAM,
+     and to authenticate the full boot loader.
+     This includes the size and expected hash of the boot loader. */
+
+  . = $BOOT_ROM_BASE;
+  .rot : {
+    _start = .;
+    *(.text.rot.entry)
+    *(.text.rot)
+    *(.text)
+    *(.rodata)
+    *(.got)
+    *(.got*)
+
+    /* reserve space for the size and expected hash of the bootloader.
+       These are populated by post-processing the ELF. */
+
+    PROVIDE(bootloader_size = .);
+    QUAD($BOOTLOADER_SIZE);
+
+    PROVIDE(bootloader_expected_hash = .);
+    *(.bootloader_hash)
+    _expected_hash_end = .;
+
+    /* connectal append the DTB at the end of the boot ROM */
+    PROVIDE(dtb_ptr = .);
+    _end = .;
+  }
+
+  ASSERT((64 == (_expected_hash_end - bootloader_expected_hash)), "hash should be 512 bytes long, but isn't!")
+  ASSERT (( . <= ($BOOT_ROM_BASE + $BOOT_ROM_SIZE) ), "Boot ROM is too large! It won't fit in the ROM.")
+
+
+  /* A special HTIF region to communicate with the host */
+  . = $FROMHOST;
+  .htif ALIGN(0x1000) (NOLOAD) : {
+    *(.htif.fromhost)
+    *(.htif.tohost)
+  }
+  . = ALIGN(0x1000);
+
+
+  /* Reserve some space for M-mode stacks */
+  .m_stacks (NOLOAD) : {
+    *(.mstacks)
+  }
+
+
+  ASSERT (( . <= $BOOTLOADER_BASE), "HTIF and Stacks overlap with the bootloader!")
+
+
+  /* trusted (but authenticated) boot loader in DRAM */
+  . = $BOOTLOADER_BASE;
+  .bootloader (NOLOAD) : {
+    PROVIDE(bootloader_ptr = .);
+    . += $BOOTLOADER_SIZE;
+  }
+
+  . = ($BOOTLOADER_BASE + $BOOTLOADER_SIZE);
+
+  /* Security monitor's keys */
+  .sm_header (NOLOAD) : {
+    PROVIDE(PK_D = .);
+    . += 32;
+
+    PROVIDE(SM_H = .);
+    . += 64;
+
+    PROVIDE(PK_SM = .);
+    . += 32;
+
+    PROVIDE(SK_SM = .);
+    . += 64;
+
+    PROVIDE(SM_SIG = .);
+    . += 64;
+
+    PROVIDE(sm_size = .);
+    . += 64;
+  }
+
+  . = ALIGN(0x1000);
+
+  /* Security monitor */
+  .sm (NOLOAD) : {
+    PROVIDE(sm_ptr = .);
+    . += 8; /* hack to make sure this section isn't empty */
+  }
+
+  ASSERT (( . <= ($DRAM_BASE + $REGION_SIZE) ), "ROT asks for a memory map where the bootloader, stacks, HTIF, and the security monitor don't fit into one DRAM region! This could be okay, but probably isn't.")
+
+}

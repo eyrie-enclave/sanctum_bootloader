@@ -1,0 +1,22 @@
+#ifndef _SANCTUM_MEMORY_H
+#define _SANCTUM_MEMORY_H
+
+#define BOOT_ROM_BASE   $BOOT_ROM_BASE
+#define BOOT_ROM_SIZE   $BOOT_ROM_SIZE
+
+#define MEM_LOADER_BASE $MEM_LOADER_BASE
+#define MSIP_BASE       $MSIP_BASE
+#define FROMHOST        $FROMHOST
+#define TOHOST          $TOHOST
+#define DRAM_BASE       $DRAM_BASE
+#define DRAM_SIZE       $DRAM_SIZE
+
+#define BOOTLOADER_BASE $BOOTLOADER_BASE
+#define BOOTLOADER_SIZE $BOOTLOADER_SIZE
+
+#define XLEN            $XLEN
+#define NUM_HARTS       $NUM_CORES
+#define REGION_SIZE     $REGION_SIZE
+#define M_STACK_SIZE    $M_STACK_SIZE
+
+#endif

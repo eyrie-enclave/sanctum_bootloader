@@ -1,0 +1,112 @@
+OUTPUT_ARCH( "riscv" )
+ENTRY( _start )
+
+SECTIONS
+{
+  /* Trusted bootloader is invoked via a function call at the base of its segment! */
+
+  . = $DRAM_BASE;
+  _start = .;
+
+  /* A special HTIF region to communicate with the host */
+  . = $FROMHOST;
+  .htif ALIGN(0x1000) (NOLOAD) : {
+    *(.htif.fromhost)
+    *(.htif.tohost)
+  }
+  . = ALIGN(0x1000);
+
+
+  /* Reserve some space for M-mode stacks (handled by ROT) */
+  .m_stacks (NOLOAD) : {
+    *(.mstacks)
+  }
+
+  ASSERT (( . <= $BOOTLOADER_BASE), "HTIF and Stacks overlap with the bootloader!")
+
+
+  /* trusted (but authenticated) boot loader in DRAM */
+  . = $BOOTLOADER_BASE;
+  .bootloader : {
+    PROVIDE(bootloader_ptr = .);
+    *(.bootloader)
+  }
+  ASSERT (( . == $BOOTLOADER_BASE + $BOOTLOADER_SIZE), "Bootloader segment is of incorrect size :(")
+
+  . = ($BOOTLOADER_BASE + $BOOTLOADER_SIZE);
+
+  /* Security monitor's keys */
+  .sm_header : {
+    PROVIDE(PK_D = .);
+    . += 32;
+
+    PROVIDE(SM_H = .);
+    . += 64;
+
+    PROVIDE(PK_SM = .);
+    . += 32;
+
+    PROVIDE(SK_SM = .);
+    . += 64;
+
+    PROVIDE(SM_SIG = .);
+    . += 64;
+
+    PROVIDE(sm_size = .);
+    QUAD( SIZEOF(.sm) );
+  }
+
+  . = ALIGN(0x1000);
+
+  /* Security monitor */
+  .sm : {
+    PROVIDE(sm_ptr = .);
+    _ftext = .;
+    *(.text.init)
+    *(.text)
+    *(.text.*)
+    *(.gnu.linkonce.t.*)
+    *(.rdata)
+    *(.rodata)
+    *(.rodata.*)
+    *(.gnu.linkonce.r.*)
+    *(.got)
+    *(.got*)
+    _etext = .;
+
+    . = ALIGN(16);
+
+    _fdata = .;
+    *(.data)
+    *(.data.*)
+    *(.srodata*)
+    *(.gnu.linkonce.d.*)
+    *(.comment)
+    . = ALIGN(4);
+    _edata = .;
+
+    _fbss = .;
+    _bss_start = .;
+    *(.bss)
+    *(.bss.*)
+    *(.sbss*)
+    *(.gnu.linkonce.b.*)
+    *(COMMON)
+    *(.sbi)
+
+    /* payload provides its own alignment and _idpt_start symbol */
+    *(.idpt)
+  }
+
+  ASSERT (( . <= ($DRAM_BASE + $REGION_SIZE) ), "ROT asks for a memory map where the bootloader, stacks, HTIF, and the security monitor don't fit into one DRAM region! This could be okay, but probably isn't.")
+
+  . = $DRAM_BASE + $REGION_SIZE;
+
+  /* Payload */
+  .payload : {
+    /* payload provides its own _payload_start symbol */
+    *(.payload)
+  }
+
+  _end = .;
+}
