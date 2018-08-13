@@ -13,14 +13,21 @@ TODO
 
 - Delegate interrupts for non-enclaves
 - Detect enclave calls via EDRBMP -- set to 0 outside of enclave mode
-- Add SM data structures, OS API, Ecnlave API
-- Document memory laoyout
+- Embed keys
+- Embed
 
 Build Steps
 ---------------
 
-We assume that the RISCV environment variable is set to the RISC-V tools (TOOD, there are a couple of other assumptions), and that the riscv-gnu-toolchain package is installed.
+We assume that the RISCV environment variable is set to the RISC-V tools
+install path, and that the riscv-gnu-toolchain package is installed.
+Please note that building the binaries directly inside the source
+directory is not supported; you need to use a separate build directory.
 
+    $ mkdir build
+    $ cd build
+    $ ../configure --prefix=$RISCV --host=riscv64-unknown-elf
     $ make
+    $ make install
 
-64-bit (RV64) ELF version of `sm` and `rot` are built, as well as a binary blob for the bootloader (`rot.bin`).
+64-bit (RV64) version `sm` are built.

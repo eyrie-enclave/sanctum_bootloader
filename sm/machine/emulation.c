@@ -148,7 +148,7 @@ void illegal_insn_trap(uintptr_t* regs, uintptr_t mcause, uintptr_t mepc)
 __attribute__((noinline))
 DECLARE_EMULATION_FUNC(truly_illegal_insn)
 {
-  return redirect_trap(mepc, mstatus, insn);
+  return redirect_trap_to_s(mepc, mstatus, insn);
 }
 
 static inline int emulate_read_csr(int num, uintptr_t mstatus, uintptr_t* result)

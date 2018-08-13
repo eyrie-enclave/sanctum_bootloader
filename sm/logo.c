@@ -2,6 +2,7 @@
 #include "machine/mtrap.h"
 #include "platform/platform_interface.h"
 #include "randomart.h"
+#include "csr.h"
 #include "sanctum_config.h"
 
 
@@ -26,6 +27,29 @@ void print_logo()
   randomart(PK_SM, 32, str);
   putstring("+--[ED25519 256]--+\n");
   putstring(str);
+
+  putstring("\nSanctum CSRs at boot:\n");
+  putstring("=====================\n");
+  snprintf(str, sizeof(str), "  CSR MEVBASE:   0x%lx\n", read_csr(0x7c0));
+  putstring(str);
+  snprintf(str, sizeof(str), "  CSR MEVMASK:   0x%lx\n", read_csr(0x7c1));
+  putstring(str);
+  snprintf(str, sizeof(str), "  CSR MEATP:     0x%lx\n", read_csr(0x7c2));
+  putstring(str);
+  snprintf(str, sizeof(str), "  CSR MMRBM:     0x%lx\n", read_csr(0x7c3));
+  putstring(str);
+  snprintf(str, sizeof(str), "  CSR MEMRBM:    0x%lx\n", read_csr(0x7c4));
+  putstring(str);
+  snprintf(str, sizeof(str), "  CSR MPARBASE:  0x%lx\n", read_csr(0x7c5));
+  putstring(str);
+  snprintf(str, sizeof(str), "  CSR MPARMASK:  0x%lx\n", read_csr(0x7c6));
+  putstring(str);
+  snprintf(str, sizeof(str), "  CSR MEPARBASE: 0x%lx\n", read_csr(0x7c7));
+  putstring(str);
+  snprintf(str, sizeof(str), "  CSR MEPARMASK: 0x%lx\n", read_csr(0x7c8));
+  putstring(str);
+
+
   putstring("\nHave a nice day!\n");
   putstring("============================\n");
 }

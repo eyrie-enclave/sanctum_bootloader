@@ -3,9 +3,9 @@ export BOOT_ROM_BASE :=     (0x1000)
 export BOOT_ROM_SIZE :=     (0x1000)
 
 export DRAM_BASE :=         (0x80000000)
-export DRAM_SIZE :=         (2048*1024*1024)
+export DRAM_SIZE :=         2048*1024*1024
 
-export REGION_SIZE :=       (32*1024*1024)
+export REGION_SIZE :=       32*1024*1024
 
 export FROMHOST :=          0x80000000
 export TOHOST :=            0x80000008
@@ -34,7 +34,7 @@ CFLAGS = \
 	-march=rv64g -mabi=lp64 \
 	-nostdlib -nostartfiles -fno-common -std=gnu11 \
 	-static -fPIC \
-	-O2 \
+	-g -O0 \
 	-Wall\
 
 .PHONY: all
@@ -112,21 +112,22 @@ lds_bootloader=bootloader/bootloader.lds
 
 
 srcs_sm = \
-	sm/sm.c \
-	sm/idpt.S \
-	sm/payload.S \
-	sm/bootloader.S \
+	sm/payload/payload.S \
+	sm/trusted_bootloader/bootloader.S \
 	sm/logo.c \
+	sm/init.S \
+	sm/init.c \
+	sm/minit.c \
+	sm/trap_or_interrupt.S \
+	sm/enclave_trap.c \
+	sm/os_trap.c \
+	sm/monitor/*.c \
+	sm/devices/*.c \
 	sm/machine/fp_asm.S \
-	sm/machine/mentry.S \
-	sm/machine/mtrap.c \
-	sm/machine/minit.c \
 	sm/machine/emulation.c \
 	sm/machine/fdt.c \
-	sm/machine/htif.c \
-	sm/machine/uart.c \
+	sm/machine/vm.c \
 	sm/machine/misaligned_ldst.c \
-	sm/machine/enclave_syscall.c \
 	common/randomart.c \
 	common/htif.c \
 	common/stacks.S \
@@ -168,7 +169,7 @@ bootloader.o: $(srcs_bootloader) $(lds_bootloader)
 	$(CC) $(CFLAGS) -I common/ -L . -T $(lds_bootloader) -Wl,-v -o $@ $(srcs_bootloader)
 
 sm.elf: $(srcs_sm) $(lds_sm) idpt bootloader.bin payload.bin
-	$(CC) $(CFLAGS) $(SM_DEFINES) -I common/ -L . -T $(lds_sm) -Wl,-v -o $@ $(srcs_sm)
+	$(CC) -I sm/ -I common/ $(CFLAGS) $(SM_DEFINES) -L . -T $(lds_sm) -Wl,-v -o $@ $(srcs_sm)
 
 %.bin: %.elf
 	$(OBJCOPY) -O binary --only-section=.$* $< $@

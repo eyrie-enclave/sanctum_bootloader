@@ -32,4 +32,6 @@ static inline pte_t ptd_create(uintptr_t ppn)
   return pte_create(ppn, PTE_V);
 }
 
+void * virt_to_phys(uint64_t va);
+
 #endif

@@ -1,5 +1,5 @@
-#ifndef _RISCV_BITS_H
-#define _RISCV_BITS_H
+#ifndef _RISCV_COMMON_MACROS_H
+#define _RISCV_COMMON_MACROS_H
 
 #define likely(x) __builtin_expect((x), 1)
 #define unlikely(x) __builtin_expect((x), 0)

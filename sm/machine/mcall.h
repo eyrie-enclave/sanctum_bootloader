@@ -11,17 +11,53 @@
 #define SBI_REMOTE_SFENCE_VMA_ASID 7
 #define SBI_SHUTDOWN 8
 
-// SM CALLS (from U-mode)
-#define UBI_SM_DEADBEEF 999
-#define UBI_SM_GET_FIELD 1000
-#define UBI_SM_AES 1001
-#define UBI_SM_SIGN 1002
-#define UBI_SM_POET 1003
+// Monitor API
 
-// FIELD IDs
-#define SM_FIELD_PK_D   (100)
-#define SM_FIELD_H_SM   (101)
-#define SM_FIELD_PK_SM  (102)
-#define SM_FIELD_SIGN_D (103)
+// SM CALLS FROM ENCLAVE (from U-mode, within an enclave)
+#define UBI_SM_ENCLAVE_BLOCK_DRAM_REGION      1000
+
+#define UBI_SM_ENCLAVE_CHECK_OWNERSHIP        1001
+
+#define UBI_SM_ENCLAVE_ACCEPT_THREAD          1002
+
+#define UBI_SM_ENCLAVE_EXIT_ENCLAVE           1003
+
+#define UBI_SM_ENCLAVE_GET_ATTESTATION_KEY    1004
+
+#define UBI_SM_ENCLAVE_ACCEPT_MESSAGE         1005
+#define UBI_SM_ENCLAVE_READ_MESSAGE           1006
+#define UBI_SM_ENCLAVE_SEND_MESSAGE           1007
+
+// SM CALLS FROM OS (these come from S-mode)
+#define SBI_SM_OS_BLOCK_DRAM_REGION           2000
+
+#define SBI_SM_OS_SET_DMA_RANGE               2001
+
+#define SBI_SM_OS_DRAM_REGION_STATE           2002
+#define SBI_SM_OS_DRAM_REGION_OWNER           2003
+#define SBI_SM_OS_ASSIGN_DRAM_REGION          2004
+#define SBI_SM_OS_FREE_DRAM_REGION            2005
+#define SBI_SM_OS_FLUSH_CACHED_DRAM_REGIONS   2006
+
+#define SBI_SM_OS_CREATE_METADATA_REGION      2007
+#define SBI_SM_OS_METADATA_REGION_PAGES       2008
+#define SBI_SM_OS_METADATA_REGION_START       2009
+#define SBI_SM_OS_THREAD_METADATA_PAGES       2010
+#define SBI_SM_OS_ENCLAVE_METADATA_PAGES      2011
+
+#define SBI_SM_OS_CREATE_ENCLAVE              2012
+#define SBI_SM_OS_LOAD_PAGE_TABLE             2013
+#define SBI_SM_OS_LOAD_PAGE                   2014
+#define SBI_SM_OS_LOAD_THREAD                 2015
+#define SBI_SM_OS_ASSIGN_THREAD               2016
+#define SBI_SM_OS_INIT_ENCLAVE                2017
+
+#define SBI_SM_OS_ENTER_ENCLAVE               2018
+
+#define SBI_SM_OS_DELETE_THREAD               2019
+
+#define SBI_SM_OS_DELETE_ENCLAVE              2020
+
+#define SBI_SM_OS_COPY_DEBUG_ENCLAVE_PAGE     2021
 
 #endif
