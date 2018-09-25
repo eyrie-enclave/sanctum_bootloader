@@ -4,7 +4,7 @@ ENTRY( _entry )
 
 SECTIONS
 {
-  . = 0x1000;
+  . = 0x2000;
 
   /* the bootloader should be position-independent
      to allow a variety of devicetree string sizes */
